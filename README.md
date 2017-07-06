@@ -1,2 +1,2 @@
-# chimee-helper-dom
-the dom handler for chimee
+# chimee-helper
+utils of chimee

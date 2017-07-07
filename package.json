@@ -1,7 +1,7 @@
 {
   "name": "chimee-helper-dom",
   "version": "0.1.0",
-  "description": "utils of chimee",
+  "description": "dom hanlders of chimee",
   "main": "lib/index.js",
   "module": "lib/index.mjs",
   "jsnext:main": "lib/index.mjs",
@@ -17,14 +17,15 @@
     "b-common": "rollup -c build/rollup.config.common.js",
     "b-es": "rollup -c build/rollup.config.es.js",
     "b-umd": "rollup -c build/rollup.config.umd.js",
-    "b-min": "rollup -c build/rollup.config.min.js"
+    "b-min": "rollup -c build/rollup.config.min.js",
+    "doc": "documentation readme  src/index.js --section=doc --github=true --project-version=true"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Chimeejs/chimee-helper-dom.git"
   },
   "keywords": [
-    "events",
+    "dom",
     "chimee",
     "video"
   ],
@@ -47,6 +48,7 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-latest": "^6.24.1",
+    "documentation": "^4.0.0-rc.1",
     "eslint": "^4.0.0",
     "eslint-plugin-flowtype": "^2.34.0",
     "eslint-plugin-jest": "^20.0.3",

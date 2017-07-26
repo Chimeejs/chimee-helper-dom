@@ -147,7 +147,7 @@ export function addEvent (el, type, handler, once = false, capture = false) {
 export function addDelegate (el, selector, type, handler, capture = false) {
 
   const handlerWrap = function (e) {
-    const targetEls = findParents(e.srcElement, el, true);
+    const targetEls = findParents(e.target || e.srcElement, el, true);
     const targetEl = query(selector, el, true).find(seEl => targetEls.find(tgEl => (seEl === tgEl)));
     targetEl && handler.apply(targetEl, arguments);
 

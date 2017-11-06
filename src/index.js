@@ -147,9 +147,20 @@ export function addEvent (el, type, handler, once = false, capture = false) {
 export function addDelegate (el, selector, type, handler, capture = false) {
 
   const handlerWrap = function (e) {
-    const targetEls = findParents(e.target || e.srcElement, el, true);
-    const targetEl = query(selector, el, true).find(seEl => targetEls.find(tgEl => (seEl === tgEl)));
-    targetEl && handler.apply(targetEl, arguments);
+    const targetElsArr = findParents(e.target || e.srcElement, el, true);
+    const targetElArr = query(selector, el, true);
+    let retEl;
+    if(targetElArr.find) {
+      retEl = targetElArr.find(seEl => targetElsArr.find(tgEl => (seEl === tgEl)));
+    }else{
+      // Fixed IE11 Array.find not defined bug
+      targetElArr.forEach(seEl => !retEl && targetElsArr.forEach(tgEl => {
+        if(!retEl && seEl === tgEl) {
+          retEl = tgEl;
+        }
+      }));
+    }
+    retEl && handler.apply(retEl, arguments);
 
   };
   /* 将包装后的方法记录到缓存中 */

@@ -1,4 +1,4 @@
-import { isArray, isString, isObject } from 'toxic-predicate-functions';
+import { isArray, isString, isObject, isBoolean } from 'toxic-predicate-functions';
 import { addEventCache, removeEventCache } from 'chimee-helper-events';
 import {makeArray} from 'chimee-helper-utils';
 
@@ -93,21 +93,19 @@ export function hasClassName (el, className) {
   return new RegExp('(?:^|\\s)' + className + '(?=\\s|$)').test(el.className);
 }
 
-// Test via a getter in the options object to see 
-// if the passive property is accessed
+/**
+ * addEventListener 是否已支持 passive
+ * @return {Boolean}
+ */
 export let supportsPassive = false;
 try {
   const opts = Object.defineProperty({}, 'passive', {
-    get: function() {
+    get () {
       supportsPassive = true;
     }
   });
-  window.addEventListener("test", null, opts);
+  window.addEventListener('test', null, opts);
 } catch (e) {}
-
-// Use our detect's results. 
-// passive applied if supported, capture will be false either way.
-const defaultCapture = supportsPassive ? { passive: true } : false;
 
 /**
  * 为HTML元素移除事件监听
@@ -117,7 +115,10 @@ const defaultCapture = supportsPassive ? { passive: true } : false;
  * @param {Boolean} once 是否只监听一次
  * @param {Boolean} capture 是否在捕获阶段的监听
  */
-export function removeEvent (el, type, handler, once = false, capture = defaultCapture) {
+export function removeEvent (el, type, handler, once = false, capture = false) {
+  if( capture!== undefined && !isBoolean(capture) && supportsPassive){
+    capture = { passive: true };
+  }
   if (once) {
     /* 尝试从缓存中读取包装后的方法 */
     const handlerWrap = removeEventCache(el, type + '_once', handler);
@@ -136,7 +137,10 @@ export function removeEvent (el, type, handler, once = false, capture = defaultC
  * @param {Boolean} once 是否只监听一次
  * @param {Boolean} capture 是否在捕获阶段监听
  */
-export function addEvent (el, type, handler, once = false, capture = defaultCapture) {
+export function addEvent (el, type, handler, once = false, capture = false) {
+  if( capture!== undefined && !isBoolean(capture) && supportsPassive){
+    capture = { passive: true };
+  }
   if (once) {
     const oldHandler = handler;
     handler = (function () {
@@ -160,8 +164,10 @@ export function addEvent (el, type, handler, once = false, capture = defaultCapt
  * @param {Function} handler 处理函数
  * @param {Boolean} capture 是否在捕获阶段监听
  */
-export function addDelegate (el, selector, type, handler, capture = defaultCapture) {
-
+export function addDelegate (el, selector, type, handler, capture = false) {
+  if( capture!== undefined && !isBoolean(capture) && supportsPassive){
+    capture = { passive: true };
+  }
   const handlerWrap = function (e) {
     const targetElsArr = findParents(e.target || e.srcElement, el, true);
     const targetElArr = query(selector, el, true);
@@ -192,7 +198,10 @@ export function addDelegate (el, selector, type, handler, capture = defaultCaptu
  * @param {Function} handler 处理函数
  * @param {Boolean} capture 是否在捕获阶段监听
  */
-export function removeDelegate (el, selector, type, handler, capture = defaultCapture) {
+export function removeDelegate (el, selector, type, handler, capture = false) {
+  if( capture!== undefined && !isBoolean(capture) && supportsPassive){
+    capture = { passive: true };
+  }
   /* 尝试从缓存中读取包装后的方法 */
   const handlerWrap = removeEventCache(el, type + '_delegate_' + selector, handler);
   handlerWrap && el.removeEventListener(type, handlerWrap, capture);
@@ -493,7 +502,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  on (type, handler, once = false, capture = defaultCapture) {
+  on (type, handler, once = false, capture = false) {
     return this.each(el => addEvent(el, type, handler, once, capture));
   }
 
@@ -505,7 +514,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  off (type, handler, once = false, capture = defaultCapture) {
+  off (type, handler, once = false, capture = false) {
     return this.each(el => removeEvent(el, type, handler, once, capture));
   }
 
@@ -517,7 +526,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  delegate (selector, type, handler, capture = defaultCapture) {
+  delegate (selector, type, handler, capture = false) {
     return this.each(el => addDelegate(el, selector, type, handler, capture));
   }
 
@@ -529,7 +538,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  undelegate (selector, type, handler, capture = defaultCapture) {
+  undelegate (selector, type, handler, capture = false) {
     return this.each(el => removeDelegate(el, selector, type, handler, capture));
   }
 

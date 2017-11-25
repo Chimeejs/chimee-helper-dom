@@ -135,10 +135,10 @@ export function removeEvent (el, type, handler, once = false, capture = false) {
  * @param {String} type 事件名称
  * @param {Function} handler 处理函数
  * @param {Boolean} once 是否只监听一次
- * @param {Boolean} capture 是否在捕获阶段监听
+ * @param {Boolean|Object} capture 是否在捕获阶段监听，这里也可以传入 { passive: true } 表示被动模式 
  */
 export function addEvent (el, type, handler, once = false, capture = false) {
-  if( capture!== undefined && !isBoolean(capture) && supportsPassive){
+  if (capture !== undefined && !isBoolean(capture) && supportsPassive) {
     capture = { passive: true };
   }
   if (once) {

@@ -8,11 +8,7 @@
     "es6": true,
     "jest/globals": true
   },
-  "extends": [
-    "plugin:flowtype/recommended"
-  ],
   "plugins": [
-    "flowtype",
     "jest"
   ],
   "parser": "babel-eslint",

@@ -1,14 +1,14 @@
 import { isArray, isString, isObject, isBoolean } from 'toxic-predicate-functions';
 import { addEventCache, removeEventCache } from 'chimee-helper-events';
-import {makeArray} from 'chimee-helper-utils';
+import { makeArray, inBrowser } from 'chimee-helper-utils';
 
- /**
+/**
  * @module dom
  * @author huzunjie
  * @description 一些常用的DOM判断及操作方法，可以使用dom.$('*')包装DOM，实现类jQuery的链式操作；当然这里的静态方法也可以直接使用。
  */
 
-const _divEl = document.createElement('div');
+const _divEl = inBrowser ? document.createElement('div') : {};
 let _textAttrName = 'innerText';
 ('textContent' in _divEl) && (_textAttrName = 'textContent');
 const _arrPrototype = Array.prototype;
@@ -19,7 +19,7 @@ const _arrPrototype = Array.prototype;
  * @param {String} attrName 目标属性名称
  * @return {String}
  */
-export function getAttr (el, attrName) {
+export function getAttr(el, attrName) {
   return el.getAttribute(attrName);
 }
 
@@ -29,7 +29,7 @@ export function getAttr (el, attrName) {
  * @param {String} attrName 目标属性名称
  * @param {String} attrVal 目标属性值
  */
-export function setAttr (el, attrName, attrVal) {
+export function setAttr(el, attrName, attrVal) {
   if (attrVal === undefined) {
     el.removeAttribute(attrName);
   } else {
@@ -42,7 +42,7 @@ export function setAttr (el, attrName, attrVal) {
  * @param {HTMLElement} el 目标元素
  * @param {String} cls 要添加的className（多个以空格分割）
  */
-export function addClassName (el, cls) {
+export function addClassName(el, cls) {
   if (!cls || !(cls = cls.trim())) {
     return;
   }
@@ -63,7 +63,7 @@ export function addClassName (el, cls) {
  * @param {HTMLElement} el 目标元素
  * @param {String} cls 要移除的className（多个以空格分割）
  */
-export function removeClassName (el, cls) {
+export function removeClassName(el, cls) {
   if (!cls || !(cls = cls.trim())) {
     return;
   }
@@ -89,7 +89,7 @@ export function removeClassName (el, cls) {
  * @param {String} className 要检查的className
  * @return {Boolean}
  */
-export function hasClassName (el, className) {
+export function hasClassName(el, className) {
   return new RegExp('(?:^|\\s)' + className + '(?=\\s|$)').test(el.className);
 }
 
@@ -100,12 +100,14 @@ export function hasClassName (el, className) {
 export let supportsPassive = false;
 try {
   const opts = Object.defineProperty({}, 'passive', {
-    get () {
+    get() {
       supportsPassive = true;
-    }
+    },
   });
-  window.addEventListener('test', null, opts);
-} catch (e) {}
+  if (inBrowser) window.addEventListener('test', null, opts);
+} catch (e) {
+  console.error(e);
+}
 
 /**
  * 为HTML元素移除事件监听
@@ -115,8 +117,8 @@ try {
  * @param {Boolean} once 是否只监听一次
  * @param {Boolean} capture 是否在捕获阶段的监听
  */
-export function removeEvent (el, type, handler, once = false, capture = false) {
-  if(capture !== undefined && !isBoolean(capture) && supportsPassive) {
+export function removeEvent(el, type, handler, once = false, capture = false) {
+  if (capture !== undefined && !isBoolean(capture) && supportsPassive) {
     capture = { passive: true };
   }
   if (once) {
@@ -137,14 +139,14 @@ export function removeEvent (el, type, handler, once = false, capture = false) {
  * @param {Boolean} once 是否只监听一次
  * @param {Boolean|Object} capture 是否在捕获阶段监听，这里也可以传入 { passive: true } 表示被动模式
  */
-export function addEvent (el, type, handler, once = false, capture = false) {
+export function addEvent(el, type, handler, once = false, capture = false) {
   if (capture !== undefined && !isBoolean(capture) && supportsPassive) {
     capture = { passive: true };
   }
   if (once) {
     const oldHandler = handler;
-    handler = (function () {
-      return function (...args) {
+    handler = (function() {
+      return function(...args) {
         oldHandler.apply(this, args);
         removeEvent(el, type, handler, once, capture);
       };
@@ -164,20 +166,20 @@ export function addEvent (el, type, handler, once = false, capture = false) {
  * @param {Function} handler 处理函数
  * @param {Boolean} capture 是否在捕获阶段监听
  */
-export function addDelegate (el, selector, type, handler, capture = false) {
-  if(capture !== undefined && !isBoolean(capture) && supportsPassive) {
+export function addDelegate(el, selector, type, handler, capture = false) {
+  if (capture !== undefined && !isBoolean(capture) && supportsPassive) {
     capture = { passive: true };
   }
-  const handlerWrap = function (e) {
+  const handlerWrap = function(e) {
     const targetElsArr = findParents(e.target || e.srcElement, el, true);
     const targetElArr = query(selector, el, true);
     let retEl;
-    if(targetElArr.find) {
+    if (targetElArr.find) {
       retEl = targetElArr.find(seEl => targetElsArr.find(tgEl => (seEl === tgEl)));
-    }else{
+    } else {
       // Fixed IE11 Array.find not defined bug
       targetElArr.forEach(seEl => !retEl && targetElsArr.forEach(tgEl => {
-        if(!retEl && seEl === tgEl) {
+        if (!retEl && seEl === tgEl) {
           retEl = tgEl;
         }
       }));
@@ -198,8 +200,8 @@ export function addDelegate (el, selector, type, handler, capture = false) {
  * @param {Function} handler 处理函数
  * @param {Boolean} capture 是否在捕获阶段监听
  */
-export function removeDelegate (el, selector, type, handler, capture = false) {
-  if(capture !== undefined && !isBoolean(capture) && supportsPassive) {
+export function removeDelegate(el, selector, type, handler, capture = false) {
+  if (capture !== undefined && !isBoolean(capture) && supportsPassive) {
     capture = { passive: true };
   }
   /* 尝试从缓存中读取包装后的方法 */
@@ -213,7 +215,7 @@ export function removeDelegate (el, selector, type, handler, capture = false) {
  * @param {String} key 样式key
  * @return {String}
  */
-export function getStyle (el, key) {
+export function getStyle(el, key) {
   return (el.currentStyle || document.defaultView.getComputedStyle(el, null))[key] || el.style[key];
 }
 
@@ -223,12 +225,12 @@ export function getStyle (el, key) {
  * @param {String} key 样式key
  * @param {String} val 样式值
  */
-export function setStyle (el, key, val) {
+export function setStyle(el, key, val) {
   if (isObject(key)) {
-    for(const k in key) {
+    for (const k in key) {
       setStyle(el, k, key[k]);
     }
-  }else{
+  } else {
     el.style[key] = val;
   }
 }
@@ -240,7 +242,7 @@ export function setStyle (el, key, val) {
  * @param {Boolean} toArray 强制输出为数组
  * @return {NodeList|Array}
  */
-export function query (selector, container = document, toArray) {
+export function query(selector, container = document, toArray) {
   const retNodeList = container.querySelectorAll(selector);
   return toArray ? Array.from(retNodeList) : retNodeList;
 }
@@ -249,7 +251,7 @@ export function query (selector, container = document, toArray) {
  * 从DOM树中移除el
  * @param {HTMLElement} el 目标元素
  */
-export function removeEl (el) {
+export function removeEl(el) {
   el.parentNode.removeChild(el);
 }
 
@@ -260,7 +262,7 @@ export function removeEl (el) {
  * @param {Boolean} haveEl 包含当前元素
  * @param {Boolean} haveEndEl 包含设定的最大父容器
  */
-export function findParents (el, endEl = null, haveEl, haveEndEl) {
+export function findParents(el, endEl = null, haveEl, haveEndEl) {
   const retEls = [];
   if (haveEl) {
     retEls.push(el);
@@ -276,16 +278,6 @@ export function findParents (el, endEl = null, haveEl, haveEndEl) {
 }
 
 /**
- * 根据选择器查询并得到目标元素的wrap包装器
- * @param {String} selector 选择器,另外支持 HTMLString||NodeList||NodeArray||HTMLElement
- * @param {HTMLElement} container 父容器
- * @return {Object}
- */
-export function $ (selector, container) {
-  return selector.constructor === NodeWrap ? selector : new NodeWrap(selector, container);
-}
-
-/**
  * @class NodeWrap
  * @description
  * NodeWrap DOM包装器，用以实现基本的链式操作
@@ -295,7 +287,7 @@ export function $ (selector, container) {
  * @param {HTMLElement} container 父容器（默认为document）
  */
 export class NodeWrap {
-  constructor (selector, container = document) {
+  constructor(selector, container = document) {
 
     const _this = this;
     _this.selector = selector;
@@ -319,7 +311,7 @@ export class NodeWrap {
       }
     } else {
       /* 其他任意对象直接构建包装器 */
-      elsArr = [selector];
+      elsArr = [ selector ];
     }
     Object.assign(_this, elsArr);
 
@@ -332,20 +324,20 @@ export class NodeWrap {
    * @param {Function} fn 遍历函数 fn(item, i)
    * @return {Object}
    */
-  each (...args) {
+  each(...args) {
     _arrPrototype.forEach.apply(this, args);
     return this;
-  };
+  }
 
   /**
    * 添加元素到DOM集合
    * @param {HTMLElement} el 要加入的元素
    * @return {this}
    */
-  push (...args) {
+  push(...args) {
     _arrPrototype.push.apply(this, args);
     return this;
-  };
+  }
 
   /**
    * 截取DOM集合片段，并得到新的包装器splice
@@ -353,16 +345,16 @@ export class NodeWrap {
    * @param {Nubmer} count
    * @return {NodeWrap} 新的DOM集合包装器
    */
-  splice (...args) {
+  splice(...args) {
     return $(_arrPrototype.splice.apply(this, args));
-  };
+  }
 
   /**
    * 查找子元素
    * @param {String} selector 选择器
    * @return {NodeWrap} 新的DOM集合包装器
    */
-  find (selector) {
+  find(selector) {
     let childs = [];
     this.each(el => {
       childs = childs.concat(query(selector, el, true));
@@ -378,7 +370,7 @@ export class NodeWrap {
    * @param {HTMLElement} childEls 要添加的HTML元素
    * @return {this}
    */
-  append (childEls) {
+  append(childEls) {
     const childsWrap = $(childEls);
     const firstEl = this[0];
     childsWrap.each(newEl => firstEl.appendChild(newEl));
@@ -390,7 +382,7 @@ export class NodeWrap {
    * @param {HTMLElement} parentEl 要添加到父容器
    * @return {this}
    */
-  appendTo (parentEl) {
+  appendTo(parentEl) {
     $(parentEl).append(this);
     return this;
   }
@@ -400,7 +392,7 @@ export class NodeWrap {
    * @param {String} val 文本内容（如果有设置该参数则执行写操作，否则执行读操作）
    * @return {this}
    */
-  text (val) {
+  text(val) {
     if (arguments.length === 0) {
       return this[0][_textAttrName];
     }
@@ -414,7 +406,7 @@ export class NodeWrap {
    * @param {String} html html内容（如果有设置该参数则执行写操作，否则执行读操作）
    * @return {this}
    */
-  html (html) {
+  html(html) {
     if (arguments.length === 0) {
       return this[0].innerHTML;
     }
@@ -429,7 +421,7 @@ export class NodeWrap {
    * @param {String} val 属性值（如果有设置该参数则执行写操作，否则执行读操作）
    * @return {this}
    */
-  attr (name, val) {
+  attr(name, val) {
     if (arguments.length === 1) {
       return getAttr(this[0], name);
     }
@@ -442,7 +434,7 @@ export class NodeWrap {
    * @param {Any} val 键值（如果有设置该参数则执行写操作，否则执行读操作）
    * @return {this}
    */
-  data (key, val) {
+  data(key, val) {
     if (arguments.length === 0) {
       return this[0].dataset || {};
     }
@@ -460,7 +452,7 @@ export class NodeWrap {
    * @param {String} val 样式值（如果有设置该参数则执行写操作，否则执行读操作）
    * @return {this}
    */
-  css (key, val) {
+  css(key, val) {
     if (arguments.length === 1 && !isObject(key)) {
       return getStyle(this[0], key);
     }
@@ -472,7 +464,7 @@ export class NodeWrap {
    * @param {String} cls 要增加的className
    * @return {this}
    */
-  addClass (cls) {
+  addClass(cls) {
     return this.each(el => addClassName(el, cls));
   }
 
@@ -481,7 +473,7 @@ export class NodeWrap {
    * @param {String} cls 要移除的className
    * @return {this}
    */
-  removeClass (cls) {
+  removeClass(cls) {
     return this.each(el => removeClassName(el, cls));
   }
 
@@ -490,7 +482,7 @@ export class NodeWrap {
    * @param {String} cls 要检查的className
    * @return {this}
    */
-  hasClass (cls) {
+  hasClass(cls) {
     return hasClassName(this[0], cls);
   }
 
@@ -502,7 +494,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  on (type, handler, once = false, capture = false) {
+  on(type, handler, once = false, capture = false) {
     return this.each(el => addEvent(el, type, handler, once, capture));
   }
 
@@ -514,7 +506,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  off (type, handler, once = false, capture = false) {
+  off(type, handler, once = false, capture = false) {
     return this.each(el => removeEvent(el, type, handler, once, capture));
   }
 
@@ -526,7 +518,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  delegate (selector, type, handler, capture = false) {
+  delegate(selector, type, handler, capture = false) {
     return this.each(el => addDelegate(el, selector, type, handler, capture));
   }
 
@@ -538,7 +530,7 @@ export class NodeWrap {
    * @param {Boolean} capture 是否在捕获阶段监听
    * @return {this}
    */
-  undelegate (selector, type, handler, capture = false) {
+  undelegate(selector, type, handler, capture = false) {
     return this.each(el => removeDelegate(el, selector, type, handler, capture));
   }
 
@@ -546,8 +538,18 @@ export class NodeWrap {
    * 从DOM树中移除
    * @return {this}
    */
-  remove () {
-    return this.each(el=> removeEl(el));
+  remove() {
+    return this.each(el => removeEl(el));
   }
-};
+}
+
+/**
+ * 根据选择器查询并得到目标元素的wrap包装器
+ * @param {String} selector 选择器,另外支持 HTMLString||NodeList||NodeArray||HTMLElement
+ * @param {HTMLElement} container 父容器
+ * @return {Object}
+ */
+export function $(selector, container) {
+  return selector.constructor === NodeWrap ? selector : new NodeWrap(selector, container);
+}
 

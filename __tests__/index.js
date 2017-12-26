@@ -42,7 +42,7 @@ test('removeClassName', () => {
 
 /* 事件操作 */
 let evtCount = 0;
-const evtHandler = e => evtCount++;
+const evtHandler = () => evtCount++;
 test('addEvent', () => {
   evtCount = 0;
   dom.addEvent(tempEl, 'click', evtHandler);
@@ -152,7 +152,7 @@ test('$', () => {
   /* NodeList */
   expect(dom.$(document.querySelectorAll('div'))[0].tagName.toLocaleLowerCase()).toBe('div');
   /* Array */
-  expect(dom.$([tempEl])[0].tagName.toLocaleLowerCase()).toBe('div');
+  expect(dom.$([ tempEl ])[0].tagName.toLocaleLowerCase()).toBe('div');
   /* 任意其他对象 */
   expect(dom.$({ any: 1 })).toHaveLength(1);
 });
@@ -239,7 +239,7 @@ test('NodeWrap.removeClass - no classList', () => {
 });
 
 let _count = 0;
-const clickHandler = e=>_count++;
+const clickHandler = () => _count++;
 test('NodeWrap.on', () => {
   _count = 0;
   dom.$(tempEl).on('click', clickHandler);

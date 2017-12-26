@@ -10,7 +10,7 @@
     "test": "jest --coverage",
     "start": "jest --coverage --watch",
     "flow": "flow",
-    "lint": "eslint . --fix",
+    "lint": "eslint . --fix && node env-check.js",
     "precommit": "npm run lint",
     "prepush": "npm run test",
     "prepublishOnly": "npm t && npm run doc",

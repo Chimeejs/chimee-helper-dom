@@ -4,7 +4,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/Chimeejs/chimee-helper-dom/master.svg?style=flat-square)](https://coveralls.io/github/Chimeejs/chimee-helper-dom?branch=master)
 [![npm](https://img.shields.io/npm/v/chimee-helper-dom.svg?colorB=brightgreen&style=flat-square)](https://www.npmjs.com/package/chimee-helper-dom)
 [![dependency Status](https://david-dm.org/Chimeejs/chimee-helper-dom.svg)](https://david-dm.org/Chimeejs/chimee-helper-dom)
-[![devDependency Status](https://david-dm.org/Chimeejs/chimee-helper-dom/dev-status.svg)](https://david-dm.org/Chimeejs/chimee-helper-dom?type=dev)
+[![devDependency Status](https://david-dm.org/Chimeejs/chimee-helper-dom/dev-status.svg)](https://david-dm.org/Chimeejs/chimee-helper-dom?type=dev) [![Greenkeeper badge](https://badges.greenkeeper.io/Chimeejs/chimee-helper-dom.svg)](https://greenkeeper.io/)
 
 dom handler of chimee
 
